@@ -26,11 +26,15 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_API_URL: ${VITE_API_URL}
-    ports:
-      - "3000:80"
-    env_file:
-      - /opt/reservasgl/config/.env
-    networks:
-      - reservasgl-network
     depends_on:
       - reservasbe
+    networks:
+      - reservasgl-network
+    ports:
+      - "3000:80"
+    volumes:
+      - ../reservasinfra/updateenv.sh:/updateenv.sh
+    env_file:
+      - /opt/reservasgl/config/.env
+    entrypoint: ["/bin/sh", "-c", "chmod +x /updateenv.sh && /updateenv.sh && nginx -g 'daemon off;'"]
+
