@@ -16,26 +16,40 @@ fi
 echo "2. Hacer peticion para obtener el token de invitado"
 ##JSON_DATA='{"username": "'"$LOC_GUEST_USERNAME"'", "password": "'"$LOC_GUEST_PASSWORD"'"}'
 JSON_DATA="{\"username\": \"$LOC_GUEST_USERNAME\", \"password\": \"$LOC_GUEST_PASSWORD\"}"
-RESPONSE="$(curl --silent --location 'http://localhost:8080/api/auth/login' \
+RESPONSE=$(curl --silent --write-out "\nHTTPSTATUS:%{http_code}" --location 'http://localhost:8080/api/auth/login' \
   --header 'Content-Type: application/json' \
-  --data-raw "$JSON_DATA")"
+  --data-raw "$JSON_DATA")
 
-echo "Respuesta del servidor: $RESPONSE"
+# Separar el cuerpo de la respuesta y el código HTTP
+HTTP_STATUS=$(echo "$RESPONSE" | grep -oP 'HTTPSTATUS:\K\d+')
+JSON_RESPONSE=$(echo "$RESPONSE" | sed -E 's/HTTPSTATUS:[0-9]+//')
 
-# Extraer el código de estado y la respuesta
-###BODY=$(echo "$LOC_VITE_TOKEN" | sed -E 's/HTTPSTATUS\:[0-9]{3}$//')
-##echo "Response Body: $BODY"
-STATUS=$(echo "$RESPONSE" | grep -oE '[0-9]{3}$')
-echo "HTTP Status: $STATUS"
+# Mostrar la respuesta completa (opcional, útil para depuración)
+echo "Respuesta del servidor: $JSON_RESPONSE"
+echo "Código HTTP: $HTTP_STATUS"
 
-# Validar si la solicitud fue exitosa
-if [ "$STATUS" -ne 200 ]; then
-  echo "Error: La solicitud falló con código $STATUS"
+# Verificar si la respuesta es JSON válido
+if echo "$JSON_RESPONSE" | jq empty 2>/dev/null; then
+  # Extraer el token de acceso
+  ACCESS_TOKEN=$(echo "$JSON_RESPONSE" | jq -r '.data.access_token')
+
+  echo "Access Token: $ACCESS_TOKEN"
+
+  # Si necesitas validar el código de estado HTTP
+  if [ "$HTTP_STATUS" -eq 200 ]; then
+    echo "Autenticación exitosa"
+  else
+    echo "Error en autenticación (HTTP $HTTP_STATUS)"
+    exit 1
+  fi
+else
+  echo "Error: La respuesta no es un JSON válido"
   exit 1
 fi
 
+
 echo "3. Extraer el token de la respuesta"
-$LOC_VITE_TOKEN=$(echo "$RESPONSE" | jq -r '.data.access_token')
+$LOC_VITE_TOKEN=$(echo "$JSON_RESPONSE" | jq -r '.data.access_token')
 
 echo "Access Token: $LOC_VITE_TOKEN"
 
