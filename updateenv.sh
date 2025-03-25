@@ -6,6 +6,7 @@ echo "1. Obtener parametros de AWS Parameter Store"
 LOC_VITE_SOURCE_IMAGES=$(aws ssm get-parameter --name "/ReservasGL/FE/vite_source_images" --with-decryption --query "Parameter.Value" --output text)
 LOC_GUEST_USERNAME=$(aws ssm get-parameter --name "/ReservasGL/FE/GuestUsername" --with-decryption --query "Parameter.Value" --output text)
 LOC_GUEST_PASSWORD=$(aws ssm get-parameter --name "/ReservasGL/FE/GuestPassword" --with-decryption --query "Parameter.Value" --output text)
+LOC_VITE_URL='http://localhost:8080/'
 
 # Validar que los parámetros no estén vacíos
 if [[ -z "$LOC_GUEST_USERNAME" || -z "$LOC_GUEST_PASSWORD" ]]; then
@@ -42,6 +43,7 @@ if echo "$JSON_RESPONSE" | jq empty 2>/dev/null; then
   # echo "Access Token: $ACCESS_TOKEN"
 
   echo "4. Actualizar valores en archivo env"
+  sed -i "s|^VITE_API_URL=.*|VITE_API_URL=${LOC_VITE_URL}|" "$CONFIG_FILE_ENV"
   sed -i "s|^VITE_GUEST_TOKEN=.*|VITE_GUEST_TOKEN=${ACCESS_TOKEN}|" "$CONFIG_FILE_ENV"
   sed -i "s|^VITE_SOURCE_IMAGES=.*|VITE_SOURCE_IMAGES=${LOC_VITE_SOURCE_IMAGES}|" "$CONFIG_FILE_ENV"
   echo "5. Datos actualizados en $CONFIG_FILE_ENV"
