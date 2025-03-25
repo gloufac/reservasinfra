@@ -16,7 +16,7 @@ fi
 
 echo "2. Hacer peticion para obtener el token de invitado"
 JSON_DATA="{\"username\": \"$LOC_GUEST_USERNAME\", \"password\": \"$LOC_GUEST_PASSWORD\"}"
-RESPONSE=$(curl --silent --write-out "\nHTTPSTATUS:%{http_code}" --location 'http://reservasbe:8080/api/auth/login' \
+RESPONSE=$(curl --silent --write-out "\nHTTPSTATUS:%{http_code}" --location 'http://localhost:8080/api/auth/login' \
   --header 'Content-Type: application/json' \
   --data-raw "$JSON_DATA")
 
