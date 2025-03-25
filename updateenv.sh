@@ -1,6 +1,7 @@
 echo "***************Inicio actualizacion de parametros en archivo env***************"
 # Ruta del archivo de configuración en la EC2
 CONFIG_FILE_ENV="/opt/reservasgl/config/.env"
+ls /opt/reservasgl/config/
 
 echo "1. Obtener parametros de AWS Parameter Store"
 LOC_VITE_SOURCE_IMAGES=$(aws ssm get-parameter --name "/ReservasGL/FE/vite_source_images" --with-decryption --query "Parameter.Value" --output text)
