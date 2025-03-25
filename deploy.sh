@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Levantar solo el reservasbe
-docker-compose up -d reservasbe
+## docker-compose up -d reservasbe
+docker-compose -f docker-compose.yml up --build -d reservasbe
 
 # Esperar a que el reservasbe esté saludable
 echo "Esperando a que el reservasbe esté listo..."
@@ -15,4 +16,5 @@ chmod +x updateenv.sh
 ./updateenv.sh
 
 # Ahora levantar el reservasfe
-docker-compose up -d reservasfe
+## docker-compose up -d reservasfe
+docker-compose -f docker-compose.yml up --build -d reservasfe
