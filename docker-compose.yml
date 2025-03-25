@@ -18,6 +18,11 @@ services:
       - "8080:8080"
     networks:
       - reservasgl-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
 
   reservasfe:
     container_name: reservasfe
@@ -27,14 +32,12 @@ services:
       args:
         VITE_API_URL: ${VITE_API_URL}
     depends_on:
-      - reservasbe
+      reservasbe:
+        condition: service_healthy
     networks:
       - reservasgl-network
     ports:
       - "3000:80"
-    volumes:
-      - ../reservasinfra/updateenv.sh:/updateenv.sh
     env_file:
       - /opt/reservasgl/config/.env
-    entrypoint: ["/bin/sh", "-c", "chmod +x /updateenv.sh && /updateenv.sh && nginx -g 'daemon off;'"]
-
+    entrypoint: ["/bin/sh", "-c", "nginx -g 'daemon off;'"]
