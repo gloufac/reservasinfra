@@ -52,12 +52,12 @@ if [[ -z "$LOC_GUEST_USERNAME" || -z "$LOC_GUEST_PASSWORD" ]]; then
 fi
 
 echo "2. Hacer peticion para obtener el token de invitado"
+JSON_DATA='{"username": "'"$LOC_GUEST_USERNAME"'", "password": "'"$LOC_GUEST_PASSWORD"'"}'
+echo "JSON_DATA: $JSON_DATA" | jq .
+
 LOC_VITE_TOKEN=$(curl --silent --show-error --write-out "HTTPSTATUS:%{http_code}" --location 'http://localhost:8080/api/auth/login' \
   --header 'Content-Type: application/json' \
-  --data-raw '{
-    \"username\": \"$LOC_GUEST_USERNAME\",
-    \"password\": \"$LOC_GUEST_PASSWORD\"
-  }')
+  --data-raw "$JSON_DATA")
 #}' | jq -r '.data.access_token')
 
 # Extraer el código de estado y la respuesta
