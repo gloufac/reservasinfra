@@ -24,8 +24,8 @@ services:
     build:
       context: ../reservas
       dockerfile: Dockerfile
-      args:
-        VITE_API_URL: ${VITE_API_URL}
+      #args:
+        #VITE_API_URL: ${VITE_API_URL}
     depends_on:
       - reservasbe
     networks:
@@ -34,4 +34,6 @@ services:
       - "3000:80"
     env_file:
       - /opt/reservasgl/config/.env
+    environment:
+      - VITE_API_URL=http://reservasbe:8080
     entrypoint: ["/bin/sh", "-c", "nginx -g 'daemon off;'"]
