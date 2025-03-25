@@ -52,12 +52,24 @@ if [[ -z "$LOC_GUEST_USERNAME" || -z "$LOC_GUEST_PASSWORD" ]]; then
 fi
 
 echo "2. Hacer peticion para obtener el token de invitado"
-LOC_VITE_TOKEN=$(curl --silent --location 'http://localhost:8080/api/auth/login' \
+LOC_VITE_TOKEN=$(curl --silent --show-error --write-out "HTTPSTATUS:%{http_code}" --location 'http://localhost:8080/api/auth/login' \
   --header 'Content-Type: application/json' \
   --data-raw '{
     \"username\": \"$LOC_GUEST_USERNAME\",
     \"password\": \"$LOC_GUEST_PASSWORD\"
-  }' | jq -r '.data.access_token')
+  }')
+#}' | jq -r '.data.access_token')
+
+# Extraer el código de estado y la respuesta
+BODY=$(echo "$LOC_VITE_TOKEN" | sed -E 's/HTTPSTATUS\:[0-9]{3}$//')
+STATUS=$(echo "$LOC_VITE_TOKEN" | grep -oE '[0-9]{3}$')
+echo "HTTP Status: $STATUS"
+echo "Response Body: $BODY"
+# Validar si la solicitud fue exitosa
+if [ "$STATUS" -ne 200 ]; then
+  echo "Error: La solicitud falló con código $STATUS"
+  exit 1
+fi
 
 # Verificar si el TOKEN se obtuvo correctamente
 if [[ -z "$LOC_VITE_TOKEN" || "$LOC_VITE_TOKEN" == "null" ]]; then
