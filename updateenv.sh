@@ -6,7 +6,7 @@ echo "1. Obtener parametros de AWS Parameter Store"
 LOC_VITE_SOURCE_IMAGES=$(aws ssm get-parameter --name "/ReservasGL/FE/vite_source_images" --with-decryption --query "Parameter.Value" --output text)
 LOC_GUEST_USERNAME=$(aws ssm get-parameter --name "/ReservasGL/FE/GuestUsername" --with-decryption --query "Parameter.Value" --output text)
 LOC_GUEST_PASSWORD=$(aws ssm get-parameter --name "/ReservasGL/FE/GuestPassword" --with-decryption --query "Parameter.Value" --output text)
-LOC_VITE_URL='http://localhost:8080/'
+LOC_VITE_URL='http://reservasbe:8080'
 
 # Validar que los parámetros no estén vacíos
 if [[ -z "$LOC_GUEST_USERNAME" || -z "$LOC_GUEST_PASSWORD" ]]; then
@@ -16,7 +16,7 @@ fi
 
 echo "2. Hacer peticion para obtener el token de invitado"
 JSON_DATA="{\"username\": \"$LOC_GUEST_USERNAME\", \"password\": \"$LOC_GUEST_PASSWORD\"}"
-RESPONSE=$(curl --silent --write-out "\nHTTPSTATUS:%{http_code}" --location 'http://localhost:8080/api/auth/login' \
+RESPONSE=$(curl --silent --write-out "\nHTTPSTATUS:%{http_code}" --location 'http://reservasbe:8080/api/auth/login' \
   --header 'Content-Type: application/json' \
   --data-raw "$JSON_DATA")
 

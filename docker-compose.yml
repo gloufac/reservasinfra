@@ -1,0 +1,36 @@
+version: '3.8'
+
+networks:
+  reservasgl-network:
+    driver: bridge
+
+services:
+  reservasbe:
+    container_name: reservasbe
+    build:
+      context: ../reservasbe
+      dockerfile: Dockerfile
+    volumes:
+      - /opt/reservasgl/config/application-prod.properties:/app/config/app.properties
+    environment:
+      - SPRING_CONFIG_LOCATION=file:/app/config/app.properties
+    ports:
+      - "8080:8080"
+    networks:
+      - reservasgl-network
+
+  reservasfe:
+    container_name: reservasfe
+    build:
+      context: ../reservas
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL}
+    ports:
+      - "3000:80"
+    env_file:
+      - /opt/reservasgl/config/.env
+    networks:
+      - reservasgl-network
+    depends_on:
+      - reservasbe
