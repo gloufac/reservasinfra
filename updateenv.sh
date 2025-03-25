@@ -14,10 +14,13 @@ if [[ -z "$LOC_GUEST_USERNAME" || -z "$LOC_GUEST_PASSWORD" ]]; then
 fi
 
 echo "2. Hacer peticion para obtener el token de invitado"
-JSON_DATA='{"username": "'"$LOC_GUEST_USERNAME"'", "password": "'"$LOC_GUEST_PASSWORD"'"}'
+##JSON_DATA='{"username": "'"$LOC_GUEST_USERNAME"'", "password": "'"$LOC_GUEST_PASSWORD"'"}'
+JSON_DATA="{\"username\": \"$LOC_GUEST_USERNAME\", \"password\": \"$LOC_GUEST_PASSWORD\"}"
 RESPONSE="$(curl --silent --location 'http://localhost:8080/api/auth/login' \
   --header 'Content-Type: application/json' \
   --data-raw "$JSON_DATA")"
+
+echo "Respuesta del servidor: $RESPONSE"
 
 # Extraer el código de estado y la respuesta
 ###BODY=$(echo "$LOC_VITE_TOKEN" | sed -E 's/HTTPSTATUS\:[0-9]{3}$//')
@@ -33,6 +36,8 @@ fi
 
 echo "3. Extraer el token de la respuesta"
 $LOC_VITE_TOKEN=$(echo "$RESPONSE" | jq -r '.data.access_token')
+
+echo "Access Token: $LOC_VITE_TOKEN"
 
 # Verificar si el TOKEN se obtuvo correctamente
 if [[ -z "$LOC_VITE_TOKEN" || "$LOC_VITE_TOKEN" == "null" ]]; then
