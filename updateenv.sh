@@ -27,12 +27,12 @@ JSON_RESPONSE=$(echo "$RESPONSE" | sed -E 's/HTTPSTATUS:[0-9]+//')
 # Mostrar la respuesta completa (opcional, útil para depuración)
 echo "Respuesta del servidor: $JSON_RESPONSE"
 echo "Código HTTP: $HTTP_STATUS"
+echo "3. Extraer el token de la respuesta"
 
 # Verificar si la respuesta es JSON válido
 if echo "$JSON_RESPONSE" | jq empty 2>/dev/null; then
   # Extraer el token de acceso
   ACCESS_TOKEN=$(echo "$JSON_RESPONSE" | jq -r '.data.access_token')
-
   echo "Access Token: $ACCESS_TOKEN"
 
   # Si necesitas validar el código de estado HTTP
@@ -42,25 +42,19 @@ if echo "$JSON_RESPONSE" | jq empty 2>/dev/null; then
     echo "Error en autenticación (HTTP $HTTP_STATUS)"
     exit 1
   fi
+
+  $LOC_VITE_TOKEN=$ACCESS_TOKEN
+  # Verificar si el TOKEN se obtuvo correctamente
+  if [[ -z "$LOC_VITE_TOKEN" || "$LOC_VITE_TOKEN" == "null" ]]; then
+    echo "Error: No se pudo obtener el access_token"
+    exit 1
+  fi
+
+  echo "2. Actualizar valores en archivo env"
+  sed -i "s|^VITE_GUEST_TOKEN=.*|VITE_GUEST_TOKEN=${LOC_VITE_TOKEN}|" "$CONFIG_FILE_ENV"
+  sed -i "s|^VITE_SOURCE_IMAGES=.*|VITE_SOURCE_IMAGES=${LOC_VITE_SOURCE_IMAGES}|" "$CONFIG_FILE_ENV"
+  echo "3. Datos actualizados en $CONFIG_FILE_ENV"
 else
   echo "Error: La respuesta no es un JSON válido"
   exit 1
 fi
-
-
-echo "3. Extraer el token de la respuesta"
-$LOC_VITE_TOKEN=$(echo "$JSON_RESPONSE" | jq -r '.data.access_token')
-
-echo "Access Token: $LOC_VITE_TOKEN"
-
-# Verificar si el TOKEN se obtuvo correctamente
-if [[ -z "$LOC_VITE_TOKEN" || "$LOC_VITE_TOKEN" == "null" ]]; then
-  echo "Error: No se pudo obtener el access_token"
-  exit 1
-fi
-
-echo "2. Actualizar valores en archivo env"
-sed -i "s|^VITE_GUEST_TOKEN=.*|VITE_GUEST_TOKEN=${LOC_VITE_TOKEN}|" "$CONFIG_FILE_ENV"
-sed -i "s|^VITE_SOURCE_IMAGES=.*|VITE_SOURCE_IMAGES=${LOC_VITE_SOURCE_IMAGES}|" "$CONFIG_FILE_ENV"
-
-echo "3. Datos actualizados en $CONFIG_FILE_ENV"
